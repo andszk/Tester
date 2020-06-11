@@ -52,6 +52,18 @@ namespace Tester
         private void button2_Click(object sender, EventArgs e)
         {
             this.ExecTester.Run();
+            LoadUniqeRuns();
+        }
+
+        private void LoadUniqeRuns()
+        {
+            foreach (var item in ExecTester.Info)
+            {
+                if (!listBox1.Items.Contains(item))
+                {
+                    listBox1.Items.Add(item);
+                }
+            }
         }
 
         private void SaveFilePath()

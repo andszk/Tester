@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Tester
 {
@@ -12,14 +11,18 @@ namespace Tester
         public string FilePath { get; set; }
         public List<RunInfo> Info { get; set; } = new List<RunInfo>();
 
+        public StringBuilder errors = new StringBuilder("Errors:\n");
+
         public void Run()
         {
-            ProcessStartInfo cmd = new ProcessStartInfo {
+            ProcessStartInfo cmd = new ProcessStartInfo
+            {
                 FileName = FilePath,
                 Arguments = "-t 5",
                 CreateNoWindow = true,
                 UseShellExecute = false,
-                RedirectStandardOutput = true};
+                RedirectStandardOutput = true
+            };
 
             var process = Process.Start(cmd);
             var reader = process.StandardOutput;
@@ -32,9 +35,20 @@ namespace Tester
             }
             else
             {
-                Info.Add(new RunInfo(process));
+                var runInfo = new RunInfo(process);
+                Info.Add(runInfo);
+                var settings = new JsonSerializerSettings{Error = HandleSerializationError };
+                string jsonString = JsonConvert.SerializeObject(process, settings);
+                jsonString += $"\nOutput: {output.Result}";
+                jsonString += errors.ToString();
+                File.WriteAllText(runInfo.CrashLogPath, jsonString);
             }
+        }
 
+        public void HandleSerializationError(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs errorArgs)
+        {
+            errors.Append(errorArgs.ErrorContext.Error.Message);
+            errorArgs.ErrorContext.Handled = true;
         }
     }
 }

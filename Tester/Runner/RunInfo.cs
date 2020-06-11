@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using Tester.Runner;
 
@@ -18,12 +19,38 @@ namespace Tester
         {
             this.Process = process;
             this.Status = Status.Crashed;
+            this.Time = process.ExitTime;
+            this.CrashLogPath = $"CrashLog{this.Time.ToString().Replace('.', ' ').Replace(':', ' ')}.txt";
         }
 
         public int Rotations { get; private set; }
         public List<FrameInfo> Frames { get; private set; } = new List<FrameInfo>();
         public Status Status { get; set; }
         public Process Process { get; private set; }
+        public DateTime Time { get; set; }
+
+        public string CrashLogPath { get; set; }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"{Time} {Enum.GetName(typeof(Status) ,Status)}");
+
+            switch (Status)
+            {
+                case Status.Successful:
+                    sb.Append($", Rotations = {Rotations}");
+                    break;
+                case Status.Crashed:
+                    sb.Append($", Exit code={Process.ExitCode}");
+                    break;
+                case Status.ParseException:
+                    sb.Append(", Exception parsing output");
+                    break;
+            }
+
+            return sb.ToString();
+        }
 
         private void Parse(string output)
         {
@@ -52,6 +79,7 @@ namespace Tester
                 }
 
                 Status = Status.Successful;
+                Time = DateTime.Now;
             }
             catch (FormatException fe)
             {
