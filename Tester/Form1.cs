@@ -70,5 +70,41 @@ namespace Tester
         {
             System.IO.File.WriteAllText(this.saveFilePath, openFileDialog1.FileName);
         }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var info = listBox1.SelectedItem as RunInfo;
+
+            if(info?.Status == Runner.Status.Successful)
+            {
+                var frames = info.Frames;
+                List<float> time = new List<float>();
+                List<float> delta_ang = new List<float>();
+                List<float> speed = new List<float>();
+                time.Add(frames[0].TimeDelta);
+                delta_ang.Add(0);
+                speed.Add(0);
+
+                for (int i =1; i<info.Frames.Count; i++)
+                {
+                    time.Add(frames[i].TimeDelta + time[i-1]);
+                    var delta = frames[i].RotationAngle - frames[i - 1].RotationAngle;
+                    if (delta < 0)
+                        delta += 360;
+                    delta_ang.Add(delta);
+                    speed.Add(delta_ang[i] / frames[i].TimeDelta);
+                }
+
+                this.chart1.Series.Clear();
+                this.chart1.Series.Add("Angular velocity");
+                this.chart1.Series["Angular velocity"].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+                for (int i = 1; i < speed.Count; i++)
+                {
+                    this.chart1.Series["Angular velocity"].Points.AddXY(time[i], speed[i]);
+                }
+                var stats = $"mean = {speed.Average()}";
+                this.statsTextBox.Text = stats;
+            }
+        }
     }
 }
