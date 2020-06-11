@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Tester.Runner;
@@ -13,9 +14,16 @@ namespace Tester
             this.Parse(output);
         }
 
+        public RunInfo(Process process)
+        {
+            this.Process = process;
+            this.Status = Status.Crashed;
+        }
+
         public int Rotations { get; private set; }
         public List<FrameInfo> Frames { get; private set; } = new List<FrameInfo>();
         public Status Status { get; set; }
+        public Process Process { get; private set; }
 
         private void Parse(string output)
         {

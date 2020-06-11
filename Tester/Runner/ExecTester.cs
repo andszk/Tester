@@ -25,8 +25,16 @@ namespace Tester
             var reader = process.StandardOutput;
             var output = reader.ReadToEndAsync();
             process.WaitForExit();
-            output.Wait();
-            Info.Add(new RunInfo(output.Result));
+            if (process.ExitCode == 0)
+            {
+                output.Wait();
+                Info.Add(new RunInfo(output.Result));
+            }
+            else
+            {
+                Info.Add(new RunInfo(process));
+            }
+
         }
     }
 }
