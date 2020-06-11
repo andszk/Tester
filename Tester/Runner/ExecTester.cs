@@ -17,6 +17,7 @@ namespace Tester
             ProcessStartInfo cmd = new ProcessStartInfo {
                 FileName = FilePath,
                 Arguments = "-t 5",
+                CreateNoWindow = true,
                 UseShellExecute = false,
                 RedirectStandardOutput = true};
 

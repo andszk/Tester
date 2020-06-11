@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace Tester
 {
     public partial class Form1 : Form
     {
+        private string saveFilePath = @".\defaultBinary.txt";
         private ExecTester ExecTester { get; }
         public Form1()
         {
@@ -21,12 +23,12 @@ namespace Tester
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
+            if (File.Exists(saveFilePath))
+            {
+                string fileName = System.IO.File.ReadAllText(saveFilePath);
+                this.textBox1.Text = fileName;
+                this.button2.Enabled = true;
+            }
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -42,6 +44,7 @@ namespace Tester
                 {
                     this.textBox1.Text = openFileDialog1.FileName;
                     this.button2.Enabled = true;
+                    SaveFilePath();
                 }
             }
         }
@@ -49,6 +52,11 @@ namespace Tester
         private void button2_Click(object sender, EventArgs e)
         {
             this.ExecTester.Run();
+        }
+
+        private void SaveFilePath()
+        {
+            System.IO.File.WriteAllText(this.saveFilePath, openFileDialog1.FileName);
         }
     }
 }

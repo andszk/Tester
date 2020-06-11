@@ -5,12 +5,12 @@ namespace Tester
 {
     public class RunInfo
     {
-        public int Rotations { get; private set; }
-
         public RunInfo(string output)
         {
             this.Parse(output);
         }
+
+        public int Rotations { get; private set; }
 
         private void Parse(string output)
         {
