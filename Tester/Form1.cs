@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,6 +16,7 @@ namespace Tester
     {
         private string saveFilePath = @".\defaultBinary.txt";
         private ExecTester ExecTester { get; }
+
         public Form1()
         {
             InitializeComponent();
@@ -51,20 +53,39 @@ namespace Tester
 
         private void button2_Click(object sender, EventArgs e)
         {
-            this.ExecTester.Run();
-            LoadUniqeRuns();
+            button2.Enabled = false;
+            List<Task> tasks = new List<Task>();
+            for (int i = 0; i < numericUpDown1.Value; i++)
+            {
+                Task t = Task.Run(() =>
+                {
+                    var info = this.ExecTester.Run();
+                    Thread load = new Thread( ()=> LoadUniqeRuns(info));
+                    load.Start();
+                });
+                tasks.Add(t);
+            }
+            Task.WaitAll(tasks.ToArray());
+            button2.Enabled = true;
         }
 
-        private void LoadUniqeRuns()
+        private async void LoadUniqeRuns(RunInfo info)
         {
-            foreach (var item in ExecTester.Info)
+            if (!listBox1.InvokeRequired)
             {
-                if (!listBox1.Items.Contains(item))
+                if (!listBox1.Items.Contains(info))
                 {
-                    listBox1.Items.Add(item);
+                    listBox1.Items.Add(info);
                 }
             }
+            else
+            {
+                SafeCallDelegate d = new SafeCallDelegate(LoadUniqeRuns);
+                listBox1.Invoke(d, new object[] { info });
+            }
         }
+
+        delegate void SafeCallDelegate(RunInfo info);
 
         private void SaveFilePath()
         {

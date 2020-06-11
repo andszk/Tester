@@ -17,17 +17,18 @@ namespace Tester
 
         public RunInfo(Process process)
         {
-            this.Process = process;
             this.Status = Status.Crashed;
             this.Time = process.ExitTime;
-            this.CrashLogPath = $"CrashLog{this.Time.ToString().Replace('.', ' ').Replace(':', ' ')}.txt";
+            this.ExitCode = process.ExitCode;
+            this.CrashLogPath = $"CrashLog{this.Time.ToString().Replace('.', ' ').Replace(':', ' ')}{process.Id}.txt";
         }
 
         public int Rotations { get; private set; }
         public List<FrameInfo> Frames { get; private set; } = new List<FrameInfo>();
         public Status Status { get; set; }
-        public Process Process { get; private set; }
         public DateTime Time { get; set; }
+
+        public int ExitCode { get; set; }
 
         public string CrashLogPath { get; set; }
 
@@ -42,7 +43,7 @@ namespace Tester
                     sb.Append($", Rotations = {Rotations}");
                     break;
                 case Status.Crashed:
-                    sb.Append($", Exit code={Process.ExitCode}");
+                    sb.Append($", Exit code={ExitCode}");
                     break;
                 case Status.ParseException:
                     sb.Append(", Exception parsing output");

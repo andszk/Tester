@@ -9,11 +9,11 @@ namespace Tester
     class ExecTester
     {
         public string FilePath { get; set; }
-        public List<RunInfo> Info { get; set; } = new List<RunInfo>();
+        public static List<RunInfo> Info { get; set; } = new List<RunInfo>();
 
         public StringBuilder errors = new StringBuilder("Errors:\n");
 
-        public void Run()
+        public RunInfo Run()
         {
             ProcessStartInfo cmd = new ProcessStartInfo
             {
@@ -31,7 +31,9 @@ namespace Tester
             if (process.ExitCode == 0)
             {
                 output.Wait();
-                Info.Add(new RunInfo(output.Result));
+                var runInfo = new RunInfo(output.Result);
+                Info.Add(runInfo);
+                return runInfo;
             }
             else
             {
@@ -42,6 +44,7 @@ namespace Tester
                 jsonString += $"\nOutput: {output.Result}";
                 jsonString += errors.ToString();
                 File.WriteAllText(runInfo.CrashLogPath, jsonString);
+                return runInfo;
             }
         }
 
