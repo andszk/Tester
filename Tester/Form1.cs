@@ -54,33 +54,53 @@ namespace Tester
         private void button2_Click(object sender, EventArgs e)
         {
             button2.Enabled = false;
-            List<Task> tasks = new List<Task>();
-            for (int i = 0; i < numericUpDown1.Value; i++)
-            {
-                Task t = Task.Run(() =>
+
+            // only wait for enabling button, don't block GUI thread otherwise
+            var waitThread = new Thread(() => {
+                List<Task> tasks = new List<Task>();
+                for (int i = 0; i < numericUpDown1.Value; i++)
                 {
-                    var info = this.ExecTester.Run();
-                    Thread load = new Thread( ()=> LoadUniqeRuns(info));
-                    load.Start();
-                });
-                tasks.Add(t);
-            }
-            Task.WaitAll(tasks.ToArray());
-            button2.Enabled = true;
+                    Task t = Task.Run(() =>
+                    {
+                        var info = this.ExecTester.Run();
+                        Thread load = new Thread( ()=> LoadNewResult(info));
+                        load.Start();
+                    });
+                    tasks.Add(t);
+                    //Don't start all at once, as it will give false results. Random seed is time based
+                    Thread.Sleep(1000);
+                }
+
+                Task.WaitAll(tasks.ToArray());
+                EnableButtonSafe();
+            });
+            waitThread.Start();
         }
 
-        private async void LoadUniqeRuns(RunInfo info)
+        private void EnableButtonSafe()
         {
-            if (!listBox1.InvokeRequired)
+            if (this.InvokeRequired)
             {
-                if (!listBox1.Items.Contains(info))
-                {
-                    listBox1.Items.Add(info);
-                }
+                SafeVoidDelagate d = new SafeVoidDelagate(EnableButtonSafe);
+                listBox1.Invoke(d, new object[] { });
             }
             else
             {
-                SafeCallDelegate d = new SafeCallDelegate(LoadUniqeRuns);
+                button2.Enabled = true;
+            }
+        }
+
+        delegate void SafeVoidDelagate();
+
+        private async void LoadNewResult(RunInfo info)
+        {
+            if (!listBox1.InvokeRequired)
+            {
+                listBox1.Items.Add(info);
+            }
+            else
+            {
+                SafeCallDelegate d = new SafeCallDelegate(LoadNewResult);
                 listBox1.Invoke(d, new object[] { info });
             }
         }

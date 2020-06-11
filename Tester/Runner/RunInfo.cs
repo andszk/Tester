@@ -10,8 +10,9 @@ namespace Tester
 {
     public class RunInfo
     {
-        public RunInfo(string output)
+        public RunInfo(string output, Process process)
         {
+            this.Time = process.ExitTime;
             this.Parse(output);
         }
 
@@ -80,7 +81,6 @@ namespace Tester
                 }
 
                 Status = Status.Successful;
-                Time = DateTime.Now;
             }
             catch (FormatException fe)
             {

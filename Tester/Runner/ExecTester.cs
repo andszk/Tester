@@ -31,7 +31,7 @@ namespace Tester
             if (process.ExitCode == 0)
             {
                 output.Wait();
-                var runInfo = new RunInfo(output.Result);
+                var runInfo = new RunInfo(output.Result, process);
                 Info.Add(runInfo);
                 return runInfo;
             }
