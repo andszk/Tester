@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
+using Tester.Runner;
 
 namespace Tester
 {
@@ -11,19 +14,53 @@ namespace Tester
         }
 
         public int Rotations { get; private set; }
+        public List<FrameInfo> Frames { get; private set; } = new List<FrameInfo>();
+        public Status Status { get; set; }
 
         private void Parse(string output)
         {
-            var pattern = @"Rotations: (\d)";
-            Regex reg = new Regex(pattern);
-            var match = reg.Match(output);
-            if (match.Success)
+            var rotPattern = @"Rotations: (?<rot>\d)";
+            var framePattern = @"dt: (?<delta>\d*.\d*) r: (?<angle>\d*.\d*)";
+
+            try
             {
-                this.Rotations = int.Parse(match.Groups[1].Value);
+                Regex reg = new Regex(rotPattern);
+                var match = reg.Match(output);
+                if (match.Success)
+                {
+                    this.Rotations = int.Parse(match.Groups["rot"].Value);
+                }
+                else
+                {
+                    this.Rotations = 0;
+                }
+
+                var frameReg = new Regex(framePattern);
+                foreach (Match frameMatch in frameReg.Matches(output))
+                {
+                    var delta = float.Parse(frameMatch.Groups["delta"].Value, CultureInfo.InvariantCulture);
+                    var angle = float.Parse(frameMatch.Groups["angle"].Value, CultureInfo.InvariantCulture);
+                    Frames.Add(new FrameInfo(delta, angle));
+                }
+
+                Status = Status.Successful;
             }
-            else
+            catch (FormatException fe)
             {
-                this.Rotations = 0;
+                Console.Out.WriteLine($"FormatException: {fe.Message}, when parsing output.");
+                Status = Status.ParseException;
+            }
+        }
+
+        public class FrameInfo
+        {
+            public float TimeDelta;
+            public float RotationAngle;
+
+            public FrameInfo(float timeDelta, float rotationAngle)
+            {
+                TimeDelta = timeDelta;
+                RotationAngle = rotationAngle;
             }
         }
     }
