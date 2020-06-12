@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MathNet.Numerics.Statistics;
 
 namespace Tester
 {
@@ -155,7 +156,7 @@ namespace Tester
                 {
                     this.chart1.Series["Angular velocity"].Points.AddXY(time[i], speed[i]);
                 }
-                var stats = $"mean = {speed.Average()}";
+                var stats = $"median = {Statistics.Median(speed):0.000}, value = {Statistics.Mean(speed):0.000} +- {Statistics.StandardDeviation(speed):0.000}, variance {Statistics.Variance(speed):0.000} ";
                 this.statsTextBox.Text = stats;
             }
         }
