@@ -18,17 +18,17 @@ namespace Tester
         }
 
         public string FilePath { get; set; }
-        public static List<RunInfo> Info { get; private set; } = new List<RunInfo>();
+        public List<RunInfo> Info { get; private set; } = new List<RunInfo>();
         private StringBuilder errors = new StringBuilder("Errors:\n");
         private readonly object infoLock = new object();
         private readonly string runsFilePath = @".\runs.bin";
 
-        public RunInfo Run()
+        public RunInfo Run(int seconds)
         {
             ProcessStartInfo cmd = new ProcessStartInfo
             {
                 FileName = FilePath,
-                Arguments = "-t 5",
+                Arguments = $"-t {seconds}",
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 RedirectStandardOutput = true
