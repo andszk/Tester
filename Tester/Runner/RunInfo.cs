@@ -25,7 +25,7 @@ namespace Tester
             this.Status = Status.Crashed;
             this.Time = process.ExitTime;
             this.ExitCode = process.ExitCode;
-            this.CrashLogPath = $"CrashLog{this.Time.ToString().Replace('.', ' ').Replace(':', ' ')}{process.Id}.txt";
+            this.CrashLogPath = $@".\logs\CrashLog{this.Time.ToString().Replace('.', ' ').Replace(':', ' ')}{process.Id}.txt";
         }
 
         [JsonProperty]

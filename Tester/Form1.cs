@@ -26,6 +26,13 @@ namespace Tester
             {
                 this.LoadNewResult(info);
             }
+
+            var logdir = @".\logs\";
+
+            if (!System.IO.Directory.Exists(logdir))
+            {
+                System.IO.Directory.CreateDirectory(logdir);
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -73,7 +80,7 @@ namespace Tester
                     });
                     tasks.Add(t);
                     //Don't start all at once, as it will give false results. Random seed is time based
-                    Thread.Sleep(1000);
+                    Thread.Sleep(50);
                 }
 
                 Task.WaitAll(tasks.ToArray());
