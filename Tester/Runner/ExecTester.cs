@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -8,10 +9,20 @@ namespace Tester
 {
     class ExecTester
     {
-        public string FilePath { get; set; }
-        public static List<RunInfo> Info { get; set; } = new List<RunInfo>();
+        public ExecTester()
+        {
+            if (File.Exists(runsFilePath))
+            {
+                Info.AddRange(this.ReadFromBinary());
+            }
+        }
 
-        public StringBuilder errors = new StringBuilder("Errors:\n");
+        public string FilePath { get; set; }
+        public static List<RunInfo> Info { get; private set; } = new List<RunInfo>();
+        private StringBuilder errors = new StringBuilder("Errors:\n");
+
+        private readonly object infoLock = new object();
+        private readonly string runsFilePath = @".\runs.bin";
 
         public RunInfo Run()
         {
@@ -32,13 +43,21 @@ namespace Tester
             {
                 output.Wait();
                 var runInfo = new RunInfo(output.Result, process);
-                Info.Add(runInfo);
+                lock (infoLock)
+                {
+                    Info.Add(runInfo);
+                }
+                WriteToBinary(runInfo);
                 return runInfo;
             }
             else
             {
                 var runInfo = new RunInfo(process);
-                Info.Add(runInfo);
+                lock (infoLock)
+                {
+                    Info.Add(runInfo);
+                }
+                WriteToBinary(runInfo);
                 var settings = new JsonSerializerSettings{Error = HandleSerializationError };
                 string jsonString = JsonConvert.SerializeObject(process, settings);
                 jsonString += $"\nOutput: {output.Result}";
@@ -52,6 +71,50 @@ namespace Tester
         {
             errors.Append(errorArgs.ErrorContext.Error.Message);
             errorArgs.ErrorContext.Handled = true;
+        }
+
+        private void WriteToBinary(RunInfo info)
+        {
+            lock (infoLock)
+            {
+                using (BinaryWriter writer = new BinaryWriter(File.Open(runsFilePath, FileMode.Append)))
+                {
+                    var json = JsonConvert.SerializeObject(info);
+                    writer.Write(json);
+                }
+            }
+        }
+
+        private List<RunInfo> ReadFromBinary()
+        {
+            lock (infoLock)
+            {
+                List<RunInfo> read = new List<RunInfo>();
+                if (File.Exists(runsFilePath))
+                {
+                    using (BinaryReader reader = new BinaryReader(File.Open(runsFilePath, FileMode.Open)))
+                    {
+                        try
+                        {
+                            while (true)
+                            {
+                                var json = reader.ReadString();
+                                var info = JsonConvert.DeserializeObject<RunInfo>(json);
+                                read.Add(info);
+                            }
+                        }
+                        catch(EndOfStreamException eos)
+                        {
+                            Console.WriteLine("End of read");
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine($"Exception e {e.Message}");
+                        }
+                    }
+                }
+                return read;
+            }
         }
     }
 }

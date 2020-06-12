@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -8,8 +9,11 @@ using Tester.Runner;
 
 namespace Tester
 {
+    [Serializable]
     public class RunInfo
     {
+        [JsonConstructor]
+        public RunInfo() { }
         public RunInfo(string output, Process process)
         {
             this.Time = process.ExitTime;
@@ -24,13 +28,12 @@ namespace Tester
             this.CrashLogPath = $"CrashLog{this.Time.ToString().Replace('.', ' ').Replace(':', ' ')}{process.Id}.txt";
         }
 
+        [JsonProperty]
         public int Rotations { get; private set; }
         public List<FrameInfo> Frames { get; private set; } = new List<FrameInfo>();
         public Status Status { get; set; }
         public DateTime Time { get; set; }
-
         public int ExitCode { get; set; }
-
         public string CrashLogPath { get; set; }
 
         public override string ToString()

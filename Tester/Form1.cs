@@ -21,6 +21,11 @@ namespace Tester
         {
             InitializeComponent();
             this.ExecTester = new ExecTester();
+            
+            foreach(var info in ExecTester.Info)
+            {
+                this.LoadNewResult(info);
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -92,7 +97,7 @@ namespace Tester
 
         delegate void SafeVoidDelagate();
 
-        private async void LoadNewResult(RunInfo info)
+        private void LoadNewResult(RunInfo info)
         {
             if (!listBox1.InvokeRequired)
             {
