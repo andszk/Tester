@@ -131,24 +131,7 @@ namespace Tester
 
             if(info?.Status == Runner.Status.Successful)
             {
-                var frames = info.Frames;
-                List<float> time = new List<float>();
-                List<float> delta_ang = new List<float>();
-                List<float> speed = new List<float>();
-                time.Add(frames[0].TimeDelta);
-                delta_ang.Add(0);
-                speed.Add(0);
-
-                for (int i =1; i<info.Frames.Count; i++)
-                {
-                    time.Add(frames[i].TimeDelta + time[i-1]);
-                    var delta = frames[i].RotationAngle - frames[i - 1].RotationAngle;
-                    if (delta < 0)
-                        delta += 360;
-                    delta_ang.Add(delta);
-                    speed.Add(delta_ang[i] / frames[i].TimeDelta);
-                }
-
+                var (time, speed) = CalculateFrames(info);
                 this.chart1.Series.Clear();
                 this.chart1.Series.Add("Angular velocity");
                 this.chart1.Series["Angular velocity"].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
@@ -159,6 +142,28 @@ namespace Tester
                 var stats = $"median = {Statistics.Median(speed):0.000}, value = {Statistics.Mean(speed):0.000} +- {Statistics.StandardDeviation(speed):0.000}, variance {Statistics.Variance(speed):0.000} ";
                 this.statsTextBox.Text = stats;
             }
+        }
+
+        private (List<float> time, List<float> speed) CalculateFrames(RunInfo info)
+        {
+            var frames = info.Frames;
+
+            List<float> time = new List<float>();
+            List<float> delta_ang = new List<float>();
+            List<float> speed = new List<float>();
+            time.Add(frames[0].TimeDelta);
+            delta_ang.Add(0);
+            speed.Add(0);
+            for (int i = 1; i < info.Frames.Count; i++)
+            {
+                time.Add(frames[i].TimeDelta + time[i - 1]);
+                var delta = frames[i].RotationAngle - frames[i - 1].RotationAngle;
+                if (delta < 0)
+                    delta += 360;
+                delta_ang.Add(delta);
+                speed.Add(delta_ang[i] / frames[i].TimeDelta);
+            }
+            return (time, speed);
         }
     }
 }
