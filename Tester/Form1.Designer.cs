@@ -48,9 +48,11 @@
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.chart2 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.chart2 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -80,7 +82,7 @@
             series1.Legend = "Legend1";
             series1.Name = "Series1";
             this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(501, 143);
+            this.chart1.Size = new System.Drawing.Size(429, 143);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
             // 
@@ -137,7 +139,7 @@
             this.listBox1.HorizontalScrollbar = true;
             this.listBox1.Location = new System.Drawing.Point(3, 19);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(252, 368);
+            this.listBox1.Size = new System.Drawing.Size(324, 368);
             this.listBox1.TabIndex = 5;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
@@ -168,7 +170,7 @@
             this.statsTextBox.Location = new System.Drawing.Point(43, 172);
             this.statsTextBox.Name = "statsTextBox";
             this.statsTextBox.ReadOnly = true;
-            this.statsTextBox.Size = new System.Drawing.Size(461, 20);
+            this.statsTextBox.Size = new System.Drawing.Size(389, 20);
             this.statsTextBox.TabIndex = 8;
             // 
             // label4
@@ -209,7 +211,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(776, 397);
-            this.splitContainer1.SplitterDistance = 258;
+            this.splitContainer1.SplitterDistance = 330;
             this.splitContainer1.TabIndex = 12;
             // 
             // splitContainer2
@@ -223,6 +225,8 @@
             // 
             // splitContainer2.Panel1
             // 
+            this.splitContainer2.Panel1.Controls.Add(this.label7);
+            this.splitContainer2.Panel1.Controls.Add(this.textBox2);
             this.splitContainer2.Panel1.Controls.Add(this.chart2);
             this.splitContainer2.Panel1.Controls.Add(this.label5);
             // 
@@ -232,9 +236,29 @@
             this.splitContainer2.Panel2.Controls.Add(this.chart1);
             this.splitContainer2.Panel2.Controls.Add(this.label3);
             this.splitContainer2.Panel2.Controls.Add(this.statsTextBox);
-            this.splitContainer2.Size = new System.Drawing.Size(508, 397);
+            this.splitContainer2.Size = new System.Drawing.Size(436, 397);
             this.splitContainer2.SplitterDistance = 198;
             this.splitContainer2.TabIndex = 9;
+            // 
+            // chart2
+            // 
+            this.chart2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.chart2.BackImageAlignment = System.Windows.Forms.DataVisualization.Charting.ChartImageAlignmentStyle.Top;
+            chartArea2.Name = "ChartArea1";
+            this.chart2.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chart2.Legends.Add(legend2);
+            this.chart2.Location = new System.Drawing.Point(3, 19);
+            this.chart2.Name = "chart2";
+            series2.ChartArea = "ChartArea1";
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            this.chart2.Series.Add(series2);
+            this.chart2.Size = new System.Drawing.Size(429, 150);
+            this.chart2.TabIndex = 10;
+            this.chart2.Text = "chart2";
             // 
             // label5
             // 
@@ -255,25 +279,26 @@
             this.label6.TabIndex = 10;
             this.label6.Text = "Run Statistics";
             // 
-            // chart2
+            // label7
             // 
-            this.chart2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.chart2.BackImageAlignment = System.Windows.Forms.DataVisualization.Charting.ChartImageAlignmentStyle.Top;
-            chartArea2.Name = "ChartArea1";
-            this.chart2.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.chart2.Legends.Add(legend2);
-            this.chart2.Location = new System.Drawing.Point(3, 19);
-            this.chart2.Name = "chart2";
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "Series1";
-            this.chart2.Series.Add(series2);
-            this.chart2.Size = new System.Drawing.Size(501, 176);
-            this.chart2.TabIndex = 10;
-            this.chart2.Text = "chart2";
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(3, 178);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(34, 13);
+            this.label7.TabIndex = 11;
+            this.label7.Text = "Stats:";
+            // 
+            // textBox2
+            // 
+            this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox2.Location = new System.Drawing.Point(43, 175);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.ReadOnly = true;
+            this.textBox2.Size = new System.Drawing.Size(389, 20);
+            this.textBox2.TabIndex = 12;
             // 
             // Form1
             // 
@@ -328,6 +353,8 @@
         private System.Windows.Forms.DataVisualization.Charting.Chart chart2;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox textBox2;
     }
 }
 

@@ -17,6 +17,7 @@ namespace Tester
     {
         private string saveFilePath = @".\defaultBinary.txt";
         private ExecTester ExecTester { get; }
+        private readonly object infoLock = new object();
 
         public Form1()
         {
@@ -110,6 +111,10 @@ namespace Tester
             if (!listBox1.InvokeRequired)
             {
                 listBox1.Items.Add(info);
+                lock (infoLock)
+                {
+                    this.UpdateGlobalStatistics();
+                }
             }
             else
             {
@@ -119,6 +124,35 @@ namespace Tester
         }
 
         delegate void SafeCallDelegate(RunInfo info);
+
+        private void UpdateGlobalStatistics()
+        {
+            var validRuns = ExecTester.Info.Where(item => item.Status == Runner.Status.Successful);
+            var speeds = validRuns.Select(run => CalculateFrames(run).speed);
+            int totalRot = validRuns.Sum(run => run.Rotations);
+            var rotations = validRuns.Select(run => run.Rotations);
+            List<int> numberOfRotations = new List<int>();
+            List<int> count = new List<int>();
+            for (int i=rotations.Min(); i <= rotations.Max(); i++)
+            {
+                numberOfRotations.Add(i);
+                count.Add(rotations.Count(r => r == i));
+            }
+
+            this.chart2.Series.Clear();
+            this.chart2.Series.Add("Rotations");
+            this.chart2.ChartAreas.First().AxisX.Title = "Number of rotations in single run";
+            this.chart2.ChartAreas.First().AxisY.Title = "Count";
+            this.chart2.Series["Rotations"].Label = null;
+            this.chart2.Series["Rotations"].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Column;
+            for (int i = 1; i < count.Count; i++)
+            {
+                this.chart2.Series["Rotations"].Points.AddXY(numberOfRotations[i], count[i]);
+            }
+            var crashed = ExecTester.Info.Where(item => item.Status == Runner.Status.Crashed).Count();
+            double crashedd = (double)crashed/ExecTester.Info.Count() * 100;
+            textBox2.Text = $"Total rotations: {totalRot} in {rotations.Count()} runs. {crashedd:0.00}% crashed.";
+        }
 
         private void SaveFilePath()
         {

@@ -20,7 +20,6 @@ namespace Tester
         public string FilePath { get; set; }
         public static List<RunInfo> Info { get; private set; } = new List<RunInfo>();
         private StringBuilder errors = new StringBuilder("Errors:\n");
-
         private readonly object infoLock = new object();
         private readonly string runsFilePath = @".\runs.bin";
 
