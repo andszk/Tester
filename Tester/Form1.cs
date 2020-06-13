@@ -71,8 +71,10 @@ namespace Tester
         private void button2_Click(object sender, EventArgs e)
         {
             button2.Enabled = false;
+            numericUpDown1.Enabled = false;
+            numericUpDown2.Enabled = false;
 
-            // only wait for enabling button, don't block GUI thread otherwise
+            // only wait for enabling controls, don't block GUI thread otherwise
             var waitThread = new Thread(() => {
                 List<Task> tasks = new List<Task>();
                 for (int i = 0; i < numericUpDown1.Value; i++)
@@ -92,21 +94,23 @@ namespace Tester
                 }
 
                 Task.WaitAll(tasks.ToArray());
-                EnableButtonSafe();
+                EnableControlsSafe();
             });
             waitThread.Start();
         }
 
-        private void EnableButtonSafe()
+        private void EnableControlsSafe()
         {
             if (this.InvokeRequired)
             {
-                SafeVoidDelagate d = new SafeVoidDelagate(EnableButtonSafe);
+                SafeVoidDelagate d = new SafeVoidDelagate(EnableControlsSafe);
                 listBox1.Invoke(d, new object[] { });
             }
             else
             {
                 button2.Enabled = true;
+                numericUpDown1.Enabled = true;
+                numericUpDown2.Enabled = true;
             }
         }
 
