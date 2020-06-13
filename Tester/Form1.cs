@@ -228,6 +228,13 @@ namespace Tester
                 var stats = $"median = {Statistics.Median(speed):0.000}, value = {Statistics.Mean(speed):0.000} +- {Statistics.StandardDeviation(speed):0.000}, variance {Statistics.Variance(speed):0.000} [deg/s]";
                 this.statsTextBox.Text = stats;
             }
+            if(info?.Status == Runner.Status.Crashed)
+            {
+                if(File.Exists(info.CrashLogPath))
+                {
+                    System.Diagnostics.Process.Start(info.CrashLogPath);
+                }
+            }
         }
 
         private (List<float> time, List<float> speed) CalculateFrames(RunInfo info)
