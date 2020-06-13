@@ -18,6 +18,7 @@ namespace Tester
         private string saveFilePath = @".\defaultBinary.txt";
         private ExecTester ExecTester { get; }
         private readonly object infoLock = new object();
+        private readonly object globalStatLock = new object();
 
         public Form1()
         {
@@ -82,6 +83,7 @@ namespace Tester
                         {
                             LoadNewResult(info);
                         }
+                        UpdateGlobalStatistics();
                     });
                     tasks.Add(t);
                     //Don't start all at once, as it will give false results. Random seed is time based
@@ -90,7 +92,6 @@ namespace Tester
 
                 Task.WaitAll(tasks.ToArray());
                 EnableButtonSafe();
-                this.UpdateGlobalStatistics();
             });
             waitThread.Start();
         }
@@ -127,38 +128,41 @@ namespace Tester
 
         private void UpdateGlobalStatistics()
         {
-            if (!this.InvokeRequired)
+            if (!InvokeRequired)
             {
-                var validRuns = ExecTester.Info.Where(item => item.Status == Runner.Status.Successful);
-                var speeds = validRuns.Select(run => CalculateFrames(run).speed);
-                int totalRot = validRuns.Sum(run => run.Rotations);
-                var rotations = validRuns.Select(run => run.Rotations);
-                List<int> numberOfRotations = new List<int>();
-                List<int> count = new List<int>();
-                for (int i = rotations.Min(); i <= rotations.Max(); i++)
+                lock (globalStatLock)
                 {
-                    numberOfRotations.Add(i);
-                    count.Add(rotations.Count(r => r == i));
-                }
+                    var validRuns = ExecTester.Info.Where(item => item.Status == Runner.Status.Successful);
+                    var speeds = validRuns.Select(run => CalculateFrames(run).speed);
+                    int totalRot = validRuns.Sum(run => run.Rotations);
+                    var rotations = validRuns.Select(run => run.Rotations);
+                    List<int> numberOfRotations = new List<int>();
+                    List<int> count = new List<int>();
+                    for (int i = rotations.Min(); i <= rotations.Max(); i++)
+                    {
+                        numberOfRotations.Add(i);
+                        count.Add(rotations.Count(r => r == i));
+                    }
 
-                this.chart2.Series.Clear();
-                this.chart2.Series.Add("Rotations");
-                this.chart2.ChartAreas.First().AxisX.Title = "Number of rotations in single run";
-                this.chart2.ChartAreas.First().AxisY.Title = "Count";
-                this.chart2.Series["Rotations"].Label = null;
-                this.chart2.Series["Rotations"].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Column;
-                for (int i = 0; i < count.Count; i++)
-                {
-                    this.chart2.Series["Rotations"].Points.AddXY(numberOfRotations[i], count[i]);
+                    this.chart2.Series.Clear();
+                    this.chart2.Series.Add("Rotations");
+                    this.chart2.ChartAreas.First().AxisX.Title = "Number of rotations in single run";
+                    this.chart2.ChartAreas.First().AxisY.Title = "Count";
+                    this.chart2.Series["Rotations"].Label = null;
+                    this.chart2.Series["Rotations"].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Column;
+                    for (int i = 0; i < count.Count; i++)
+                    {
+                        this.chart2.Series["Rotations"].Points.AddXY(numberOfRotations[i], count[i]);
+                    }
+                    var crashed = ExecTester.Info.Where(item => item.Status == Runner.Status.Crashed).Count();
+                    double crashedd = (double)crashed / ExecTester.Info.Count() * 100;
+                    textBox2.Text = $"Total rotations: {totalRot} in {rotations.Count()} runs. {crashedd:0.00}% crashed.";
                 }
-                var crashed = ExecTester.Info.Where(item => item.Status == Runner.Status.Crashed).Count();
-                double crashedd = (double)crashed / ExecTester.Info.Count() * 100;
-                textBox2.Text = $"Total rotations: {totalRot} in {rotations.Count()} runs. {crashedd:0.00}% crashed.";
             }
             else
             {
                 SafeVoidDelagate d = new SafeVoidDelagate(UpdateGlobalStatistics);
-                listBox1.Invoke(d, new object[] {});
+                chart2.Invoke(d, new object[] {});
             }
         }
 
@@ -175,6 +179,8 @@ namespace Tester
             {
                 var (time, speed) = CalculateFrames(info);
                 this.chart1.Series.Clear();
+                this.chart1.ChartAreas.First().AxisX.Title = "Time";
+                this.chart1.ChartAreas.First().AxisY.Title = "Angular velocity";
                 this.chart1.Series.Add("Angular velocity");
                 this.chart1.Series["Angular velocity"].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
                 for (int i = 1; i < speed.Count; i++)
