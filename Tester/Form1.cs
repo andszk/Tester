@@ -73,6 +73,9 @@ namespace Tester
             button2.Enabled = false;
             numericUpDown1.Enabled = false;
             numericUpDown2.Enabled = false;
+            progressBar1.Maximum = (int)numericUpDown1.Value;
+            progressBar1.Value = 0;
+            progressBar1.Visible = true;
 
             // only wait for enabling controls, don't block GUI thread otherwise
             var waitThread = new Thread(() => {
@@ -88,6 +91,7 @@ namespace Tester
                         }
                         UpdateGlobalStatistics();
                     });
+                    UpdateProgressBarOnCompletion(t);
                     tasks.Add(t);
                     //Don't start all at once, as it will give false results. Random seed is time based
                     Thread.Sleep(50);
@@ -97,6 +101,25 @@ namespace Tester
                 EnableControlsSafe();
             });
             waitThread.Start();
+        }
+
+        async Task UpdateProgressBarOnCompletion(Task task)
+        {
+            await task;
+            UpdateProgressBar();
+        }
+
+        private void UpdateProgressBar()
+        {
+            if (this.InvokeRequired)
+            {
+                SafeVoidDelagate d = new SafeVoidDelagate(UpdateProgressBar);
+                progressBar1.Invoke(d, new object[] { });
+            }
+            else
+            {
+                this.progressBar1.Value++;
+            }
         }
 
         private void EnableControlsSafe()
@@ -111,6 +134,7 @@ namespace Tester
                 button2.Enabled = true;
                 numericUpDown1.Enabled = true;
                 numericUpDown2.Enabled = true;
+                progressBar1.Visible = false;
             }
         }
 
