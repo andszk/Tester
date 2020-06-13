@@ -15,4 +15,4 @@ Download and complie tested app from https://github.com/andszk/RotateRectangle. 
 
 ## Window
 
-![window](Tester\splash.JPG)
+![window](https://github.com/andszk/Tester/blob/master/Tester/splash.JPG)
