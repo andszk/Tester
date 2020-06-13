@@ -21,6 +21,7 @@ namespace Tester
         public List<RunInfo> Info { get; private set; } = new List<RunInfo>();
         private StringBuilder errors = new StringBuilder("Errors:\n");
         private readonly object infoLock = new object();
+        private readonly object writeLock = new object();
         private readonly string runsFilePath = @".\runs.bin";
 
         public RunInfo Run(int seconds)
@@ -55,13 +56,14 @@ namespace Tester
                 lock (infoLock)
                 {
                     Info.Add(runInfo);
+                    WriteToBinary(runInfo);
+                    var settings = new JsonSerializerSettings { Error = HandleSerializationError };
+                    string jsonString = JsonConvert.SerializeObject(process, settings);
+                    jsonString += $"\nOutput: {output.Result}";
+                    jsonString += errors.ToString();
+                    File.WriteAllText(runInfo.CrashLogPath, jsonString);
+                    errors.Clear();
                 }
-                WriteToBinary(runInfo);
-                var settings = new JsonSerializerSettings{Error = HandleSerializationError };
-                string jsonString = JsonConvert.SerializeObject(process, settings);
-                jsonString += $"\nOutput: {output.Result}";
-                jsonString += errors.ToString();
-                File.WriteAllText(runInfo.CrashLogPath, jsonString);
                 return runInfo;
             }
         }
@@ -74,7 +76,7 @@ namespace Tester
 
         private void WriteToBinary(RunInfo info)
         {
-            lock (infoLock)
+            lock (writeLock)
             {
                 using (BinaryWriter writer = new BinaryWriter(File.Open(runsFilePath, FileMode.Append)))
                 {

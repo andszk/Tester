@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MathNet.Numerics.Statistics;
+using static Tester.RunInfo;
 
 namespace Tester
 {
@@ -132,7 +133,8 @@ namespace Tester
             {
                 lock (globalStatLock)
                 {
-                    var validRuns = ExecTester.Info.Where(item => item.Status == Runner.Status.Successful);
+                    var runs = listBox1.Items.Cast<RunInfo>();
+                    var validRuns = runs.Where(item => item.Status == Runner.Status.Successful);
                     var speeds = validRuns.Select(run => CalculateFrames(run).speed);
                     int totalRot = validRuns.Sum(run => run.Rotations);
                     var rotations = validRuns.Select(run => run.Rotations);
@@ -154,9 +156,16 @@ namespace Tester
                     {
                         this.chart2.Series["Rotations"].Points.AddXY(numberOfRotations[i], count[i]);
                     }
-                    var crashed = ExecTester.Info.Where(item => item.Status == Runner.Status.Crashed).Count();
-                    double crashedd = (double)crashed / ExecTester.Info.Count() * 100;
-                    textBox2.Text = $"Total rotations: {totalRot} in {rotations.Count()} runs. {crashedd:0.00}% crashed.";
+                    var crashed = runs.Where(item => item.Status == Runner.Status.Crashed).Count();
+                    double crashedd = (double)crashed / runs.Count() * 100;
+                    var allRuns = new List<float>();
+                    foreach(var run in validRuns)
+                    {
+                        var times = run.Frames.Select(frame => frame.TimeDelta).ToList();
+                        allRuns.AddRange(times);
+                    }
+                    textBox2.Text = $"Total rotations {totalRot} in successful {rotations.Count()} runs. {crashedd:0.00}% crashed.\r\n" +
+                        $"Median frame length from all runs {Statistics.Median(allRuns):0.00} ms, mean {Statistics.Mean(allRuns):0.00} ms";
                 }
             }
             else
@@ -179,15 +188,16 @@ namespace Tester
             {
                 var (time, speed) = CalculateFrames(info);
                 this.chart1.Series.Clear();
-                this.chart1.ChartAreas.First().AxisX.Title = "Time";
-                this.chart1.ChartAreas.First().AxisY.Title = "Angular velocity";
+                this.chart1.ChartAreas[0].AxisX.Title = "Time";
+                this.chart1.ChartAreas[0].AxisY.Title = "Angular velocity";
+                this.chart1.ChartAreas[0].AxisX.LabelStyle.Format = "{0:000}ms";
                 this.chart1.Series.Add("Angular velocity");
                 this.chart1.Series["Angular velocity"].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
                 for (int i = 1; i < speed.Count; i++)
                 {
                     this.chart1.Series["Angular velocity"].Points.AddXY(time[i], speed[i]);
                 }
-                var stats = $"median = {Statistics.Median(speed):0.000}, value = {Statistics.Mean(speed):0.000} +- {Statistics.StandardDeviation(speed):0.000}, variance {Statistics.Variance(speed):0.000} ";
+                var stats = $"median = {Statistics.Median(speed):0.000}, value = {Statistics.Mean(speed):0.000} +- {Statistics.StandardDeviation(speed):0.000}, variance {Statistics.Variance(speed):0.000} [deg/s]";
                 this.statsTextBox.Text = stats;
             }
         }
