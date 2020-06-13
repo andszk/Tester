@@ -24,7 +24,8 @@ namespace Tester
         public Form1()
         {
             InitializeComponent();
-            this.ExecTester = new ExecTester();            
+            this.ExecTester = new ExecTester();
+            this.ExecTester.RunEnded += OnRunEnded;
             foreach(var info in ExecTester.Info)
             {
                 this.LoadNewResult(info);
@@ -91,7 +92,6 @@ namespace Tester
                         }
                         UpdateGlobalStatistics();
                     });
-                    UpdateProgressBarOnCompletion(t);
                     tasks.Add(t);
                     //Don't start all at once, as it will give false results. Random seed is time based
                     Thread.Sleep(50);
@@ -163,6 +163,8 @@ namespace Tester
                 {
                     var runs = listBox1.Items.Cast<RunInfo>();
                     var validRuns = runs.Where(item => item.Status == Runner.Status.Successful);
+                    if (validRuns.Count() == 0)
+                        return;
                     var speeds = validRuns.Select(run => CalculateFrames(run).speed);
                     int totalRot = validRuns.Sum(run => run.Rotations);
                     var rotations = validRuns.Select(run => run.Rotations);
@@ -178,6 +180,7 @@ namespace Tester
                     this.chart2.Series.Add("Rotations");
                     this.chart2.ChartAreas.First().AxisX.Title = "Number of rotations in single run";
                     this.chart2.ChartAreas.First().AxisY.Title = "Count";
+                    this.chart2.ChartAreas.First().AxisY.Maximum = count.Max();
                     this.chart2.Series["Rotations"].Label = null;
                     this.chart2.Series["Rotations"].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Column;
                     for (int i = 0; i < count.Count; i++)
@@ -192,7 +195,7 @@ namespace Tester
                         var times = run.Frames.Select(frame => frame.TimeDelta).ToList();
                         allRuns.AddRange(times);
                     }
-                    textBox2.Text = $"Total rotations {totalRot} in successful {rotations.Count()} runs. {crashedd:0.00}% crashed.\r\n" +
+                    textBox2.Text = $"Total rotations {totalRot} in {rotations.Count()} successful runs. {crashedd:0.00}% crashed.\r\n" +
                         $"Median frame length from all runs {Statistics.Median(allRuns):0.00} ms, mean {Statistics.Mean(allRuns):0.00} ms";
                 }
             }
@@ -257,6 +260,11 @@ namespace Tester
                 speed.Add(delta_ang[i] / frames[i].TimeDelta);
             }
             return (time, speed);
+        }
+
+        private void OnRunEnded(object sender, EventArgs e)
+        {
+            UpdateProgressBar();
         }
     }
 }

@@ -23,6 +23,7 @@ namespace Tester
         private readonly object infoLock = new object();
         private readonly object writeLock = new object();
         private readonly string runsFilePath = @".\runs.bin";
+        public event EventHandler RunEnded;
 
         public RunInfo Run(int seconds)
         {
@@ -39,6 +40,7 @@ namespace Tester
             var reader = process.StandardOutput;
             var output = reader.ReadToEndAsync();
             process.WaitForExit();
+            RunEnded?.Invoke(this, new EventArgs());
             if (process.ExitCode == 0)
             {
                 output.Wait();
