@@ -25,7 +25,7 @@ namespace Tester
             this.Status = Status.Crashed;
             this.Time = process.ExitTime;
             this.ExitCode = process.ExitCode;
-            this.CrashLogPath = $@".\logs\CrashLog{this.Time.ToString().Replace('.', ' ').Replace(':', ' ')}{process.Id}.txt";
+            this.CrashLogPath = $@".\logs\CrashLog{RemoveSpecialCharacters(this.Time.ToString())}{process.Id}.txt";
         }
 
         [JsonProperty]
@@ -90,6 +90,19 @@ namespace Tester
                 Console.Out.WriteLine($"FormatException: {fe.Message}, when parsing output.");
                 Status = Status.ParseException;
             }
+        }
+
+        private string RemoveSpecialCharacters(string s)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in s)
+            {
+                if ((c >= '0' && c <= '9'))
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
         }
 
         public class FrameInfo
